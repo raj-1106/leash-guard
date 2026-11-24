@@ -17,7 +17,7 @@ Anyone who signs Solana transactions, especially people interacting with new dAp
 
 ## What it does
 
-1. Takes a base64 serialized Solana transaction (legacy or v0).
+1. Takes a base64 serialized Solana transaction (legacy or v0), or a mainnet transaction signature (for example from Solscan).
 2. Decodes every instruction and runs rule checks:
    - unlimited token approvals (`Approve` / `ApproveChecked`) → **block**
    - authority changes (`SetAuthority`) → **block**
@@ -73,7 +73,7 @@ npm test
 ## Key decisions
 
 - **Rules decide, the LLM explains.** A security verdict must be reproducible and can't depend on model output.
-- **No RPC dependency for screening.** The agent works from the serialized transaction alone, so it is fast and doesn't leak what you are about to sign to a third party.
+- **Screening itself is offline.** The agent works from the serialized transaction alone. The only network call is optional: if you paste a mainnet signature, it fetches that transaction from a public RPC (`SOLANA_RPC_URL`, default `api.mainnet-beta.solana.com`).
 - **Fails safe on what it can't see.** Lookup-table accounts can't be inspected offline, so the agent warns instead of passing them.
 
 ## Limitations
