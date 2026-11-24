@@ -2,10 +2,11 @@ import express from "express";
 import { screenTransaction } from "./screen.js";
 import { explain } from "./explain.js";
 import { samples } from "./samples.js";
+import { page } from "./page.js";
 
 const app = express();
 app.use(express.json({ limit: "100kb" }));
-app.use(express.static("public"));
+app.get("/", (_req, res) => res.type("html").send(page));
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.get("/samples", (_req, res) => samples().then((s) => res.json(s)));
