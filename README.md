@@ -76,6 +76,34 @@ npm test
 - **Screening itself is offline.** The agent works from the serialized transaction alone. The only network call is optional: if you paste a mainnet signature, it fetches that transaction from a public RPC (`SOLANA_RPC_URL`, default `api.mainnet-beta.solana.com`).
 - **Fails safe on what it can't see.** Lookup-table accounts can't be inspected offline, so the agent warns instead of passing them.
 
+## Verifiable verdicts (zkVerify)
+
+The screening rules are also implemented in Rust (`zk/core`) and run inside a RISC Zero zkVM (`zk/methods/guest`). The proof says: *this exact rule code, run on the transaction with this SHA-256, produced this verdict.* The guest's image ID pins the rules, so nobody (including an LLM or the server operator) can change a verdict without the proof failing.
+
+Public output (journal): `sha256(transaction) || verdict`, where verdict is `00` allow, `01` warn, `02` block.
+
+**Example, verified on zkVerify testnet:** the unlimited-token-approval sample.
+
+| | |
+| --- | --- |
+| Image ID | `0x2492e5403d52f10342cc107486b3dad27c0dba9d430cb9467da661e415a358ac` |
+| Journal | `0xae22924f6b2001b0f1658ac279595a3ce1f0439e4682cf8153427c0937695f5502` (tx hash `ae2292...5f55`, verdict `02` = block) |
+| zkVerify tx | [`0xf0e9215e...32c0c`](https://zkverify-testnet.subscan.io/extrinsic/0xf0e9215e067a9558880b3300b9276ad081ac901f7fc82a3e30253eb80ac32c0c) |
+
+Reproduce:
+
+```bash
+cd zk && cargo build --release
+RISC0_DEV_MODE=0 ./target/release/host "<base64 tx>" proofs/out.json   # ~3 min on 2 cores
+KURIER_API_KEY=... node ../scripts/submit-proof.mjs zk/proofs/out.json  # Kurier testnet
+```
+
+Caveats, stated plainly:
+- The live `/screen` endpoint does **not** generate proofs; proving takes minutes. Proofs are generated offline, and one is published for the sample above.
+- The Rust rules are a port of the TypeScript rules. Parity is tested on the four sample transactions only.
+- Proofs use RISC Zero **3.0.6**, pinned from git because that is the line zkVerify's `V3_0` verifier accepts (3.1.0 proofs were not accepted). risc0 3.0.x is yanked on crates.io, and the 3.1.0 release notes describe soundness fixes, so treat this as a testnet demonstration, not a production guarantee.
+- This is testnet only.
+
 ## Limitations
 
 - The flagged-address list is a small demo list, not a live reputation feed.
@@ -85,7 +113,8 @@ npm test
 
 ## Roadmap
 
-- **zkVerify / zkTLS (not implemented yet):** prove that a reputation-API response the agent relied on (for example "address X is flagged") was really fetched, and anchor the proof on zkVerify so reviewers can check the claim.
+- Move to a current RISC Zero release once zkVerify supports it, and prove on demand.
+- zkTLS: prove that a reputation-API response the agent relied on (for example "address X is flagged") was really fetched.
 - Watch Leash (Solana timelock vault) vaults and use the timelock window to alert the owner about suspicious pending withdrawals.
 - Replace the demo blocklist with a real reputation source.
 
