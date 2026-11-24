@@ -22,4 +22,6 @@ app.post("/screen", async (req, res) => {
 });
 
 const port = Number(process.env.PORT ?? 3000);
-app.listen(port, () => console.log(`leash-guard on :${port}`));
+if (!process.env.VERCEL) app.listen(port, () => console.log(`leash-guard on :${port}`));
+
+export default app;
