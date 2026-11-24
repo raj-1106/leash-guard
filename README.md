@@ -79,7 +79,7 @@ npm test
 ## Limitations
 
 - The flagged-address list is a small demo list, not a live reputation feed.
-- Program recognition covers the System, SPL Token, Token-2022, Associated Token, Compute Budget and Memo programs. Anything else is a warning, which will include many legitimate programs.
+- Program recognition covers the core Solana programs plus a short list of popular DeFi programs (Jupiter, Raydium, Orca, Meteora, Pump). Recognised means common, not audited. Anything else is a warning, which will include many legitimate programs.
 - It does not simulate transactions or resolve lookup tables, so it can miss risks that only show up at execution time.
 - Not a substitute for an audit. It is a pre-sign checklist.
 

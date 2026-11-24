@@ -23,6 +23,16 @@ const KNOWN = new Set([
   "ComputeBudget111111111111111111111111111111",
   "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
   "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo",
+  // Widely used programs. Recognised means common, not audited or safe.
+  "Stake11111111111111111111111111111111111111",
+  "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4", // Jupiter v6
+  "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8", // Raydium AMM v4
+  "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C", // Raydium CPMM
+  "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK", // Raydium CLMM
+  "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc", // Orca Whirlpool
+  "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo", // Meteora DLMM
+  "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P", // Pump.fun
+  "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA", // Pump AMM
 ]);
 
 // Demo list; in production this comes from a reputation API (see zkTLS step).
@@ -94,6 +104,11 @@ export function screenTransaction(b64: string): Verdict {
       }
     }
   }
+
+  const seen = new Set<string>();
+  const unique = findings.filter((f) => !seen.has(f.code + f.detail) && seen.add(f.code + f.detail));
+  findings.length = 0;
+  findings.push(...unique);
 
   const verdict: Level = findings.some((f) => f.level === "block") ? "block" : findings.length ? "warn" : "allow";
   return { verdict, findings, programs: [...programs] };
