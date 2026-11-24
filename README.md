@@ -35,7 +35,7 @@ The verdict comes from the deterministic rules. The LLM only explains the findin
 Open the demo page and click one of the four samples, or call the API:
 
 ```bash
-curl -s -X POST <your-vercel-url>/screen \
+curl -s -X POST https://leash-guard.vercel.app//screen \
   -H "content-type: application/json" \
   -d '{"transaction":"<base64 transaction>"}'
 ```
